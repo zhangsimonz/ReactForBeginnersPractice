@@ -1,13 +1,16 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Helper =require('./helpers');
+var React = require("react");
+var ReactDOM = require("react-dom");
+var Helper =require("./helpers");
 
-var ReactRouter = require('react-router');
+var ReactRouter = require("react-router");
 var Router = ReactRouter.Router;
 var Route = ReactRouter.Route;
-var Navigation = ReactRouter.Navigation;  // mixin
+var History = ReactRouter.History;  // mixin TODO: don't understand this yet, do some research when if video course does not cover
 var createBrowserHistory = require("history/lib/createBrowserHistory");
 
+// Firebase
+var Rebase = require("re-base");
+var base = Rebase.createClass("https://fishshopdemo.firebaseio.com/");
 
 /*
  Main application interface
@@ -19,6 +22,13 @@ var App = React.createClass({
 			fishes : {},
 			order : {}
 		}
+	},
+	
+	componentDidMount : function () {
+		base.syncState(this.props.params.storeID + "/fishes", {
+			context : this,
+			state : "fishes"
+		});
 	},
 	
 	addToOrder : function(key) {
@@ -235,7 +245,7 @@ var Inventory = React.createClass({
 	This will let us create <StorePicker/>
 */
 var StorePicker = React.createClass({
-	mixins : [Navigation],
+	mixins : [History],
 	goToStore : function (event) {
 		event.preventDefault();
 		
@@ -254,7 +264,7 @@ var StorePicker = React.createClass({
 					Please enter A store.
 				</h2>
 				<input type="text" ref="storeID" defaultValue={Helper.getFunName()} required />
-				<input type="Submit" />
+				<input type="Submit" content="Submit"/>
 
 			</form>
 		);
@@ -272,6 +282,9 @@ var NotFound = React.createClass({
 
 /*
 	Routes
+	TODO: constantly getting warnings from Chrome Dev Tools at the moment, no solution yet, may check later
+	TODO: warning message: You are manually calling a React.PropTypes validation function for the `components` prop on `Route`.
+	TODO: This is deprecated and will not work in the next major version. You may be seeing this warning due to a third-party PropTypes library.
  */
 var routes = (
 	<Router history={createBrowserHistory()}>
